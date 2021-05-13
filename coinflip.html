@@ -1,0 +1,19 @@
+<script>
+
+function h_or_t() {
+	return ((Math.random()>0.5)? 1 : 0)
+}
+function coinFlip() {
+    console.log((h_or_t())? "heads" : "tails")
+}
+function test(n) {
+    let count_heads = 0
+    for (let i = n; i>0; i--) {
+        count_heads += h_or_t()
+    }
+    console.log(`Flipped ${n} coins, resulting in ${count_heads} heads.`)
+}
+coinFlip()
+test(1000)
+
+</script>
