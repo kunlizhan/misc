@@ -1,0 +1,77 @@
+<script>
+'use strict';
+
+
+let Roman_Num = {}
+
+function Roman_Num_Init() {
+	let map = Roman_Num.map = new Map()
+	map.set("I", 1)
+	map.set("V", 5)
+	map.set("X", 10)
+	map.set("L", 50)
+	map.set("C", 100)
+	map.set("D", 500)
+	map.set("M", 1000)
+
+	Roman_Num.valid_roman_letters = new Array(Roman_Num.map.keys())
+
+	Roman_Num.convert = function(input) {return convert(input)}
+
+	function convert(input) {
+		if ((typeof input) === "number") {return arab_to_roman(input)}
+		else if ((typeof input) === "string") {return roman_to_arab(input)}
+		else {throw new Roman_Num_Err("attempted convert() on neither number nor string")}
+	}
+
+	function arab_to_roman(num) {
+		return "arab_to_roman functionality coming soon near you!"
+	}
+
+	function roman_to_arab(str) {
+		str = str.toUpperCase()
+		let prev_letter = ""
+		let current_letter = ""
+		let same_letter_streak = 0
+		let count = 0
+
+		for (let i=0; i<str.length; i++) {
+			prev_letter = current_letter
+			current_letter = str[i]
+
+			if (!Roman_Num.map.has(current_letter)) {throw new Roman_Num_Err("string contains invalid character")}
+			else if (prev_letter === "" || prev_letter === current_letter) {same_letter_streak++}
+			else if (value(prev_letter) > value(current_letter)) {
+				count += value(prev_letter) * same_letter_streak
+				same_letter_streak = 1
+			}
+			else if (same_letter_streak === 1) {
+				count -= value(prev_letter)
+			}
+			else {throw new Roman_Num_Err("non-standard subtractive notation")}
+
+			if (i === str.length-1) {count += value(prev_letter) * same_letter_streak}
+		}
+		return count
+	}
+
+	function value(letter) {return Roman_Num.map.get(letter)}
+
+	class Roman_Num_Err {
+		constructor(type) {
+			this.type = type
+		}
+	}
+}
+Roman_Num_Init()
+
+
+console.log(Roman_Num)
+console.log(Roman_Num.convert(1234))
+console.log(Roman_Num.convert("VII"))
+console.log(Roman_Num.convert("XXVIII"))
+console.log(Roman_Num.convert("IV"))
+console.log(Roman_Num.convert("MM22"))
+console.log(Roman_Num.convert("test12"))
+
+</script>
