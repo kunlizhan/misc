@@ -16,6 +16,21 @@
 	<script>
 'use strict';
 
+//html hook
+$('input').on('keydown', function(event) {
+	var x = event.which
+	if (x === 13) {
+		event.preventDefault()
+		submit_input()
+	}
+})
+function submit_input() {
+	let result = Roman_Num.convert(document.getElementById("myInput").value)
+	if (typeof result === "undefined") {result = "Invalid roman numeral. See console for error details."}
+	$(".result").html(result);
+}
+
+//Roman_Num library
 let Roman_Num = {}
 
 function Roman_Num_Init() {
@@ -79,8 +94,8 @@ function Roman_Num_Init() {
 			prev_letter = current_letter
 			current_letter = str[i]
 
-			if (!Roman_Num.available_letters.has(current_letter)) {throw new Roman_Num_Err("string contains invalid character combination")}
-			else {count += value(current_letter)}
+			if (!Roman_Num.map.has(current_letter)) {throw new Roman_Num_Err("string contains invalid character")}
+			count += value(current_letter)
 
 			if (prev_letter === current_letter) {
 				//split possibilities into duplication or not
@@ -89,16 +104,23 @@ function Roman_Num_Init() {
 				else {throw new Roman_Num_Err("invalid letter duplication")}
 			}
 			else {
-				//if the letter is not a duplicate...
 				let sub = prev_letter+current_letter
+				//if the letter is not a duplicate, and it is smaller in value, it may be a new segment
 				if (prev_letter === "" || value(prev_letter) > value(current_letter)) {
+					//check to see if the value is valid: it cannot be disabled due to previous subtraction notation already representing the relevant digit
+					if (!Roman_Num.available_letters.has(current_letter)) {throw new Roman_Num_Err("invalid sequence of letters")}
 					same_letter_streak = 1
-					//but the letter is a smaller value than previous, then this is the beginning of a new segment
 				}
+				//if the letter is a larger value, we check if it is a valid subtraction
 				else if (same_letter_streak === 1 && Roman_Num.available_subs.has(sub)) {
+					//undo previous count of the subtracted value and subtract it
 					count -= value(prev_letter)*2
-					disable_smaller_digit_letters(sub)
-					disable_equal_and_smaller_subs(sub)
+					//disable letters in available_letters which represent the same digit range
+					disable_same_digit_letters(sub)
+					//disable the same and larger subtractions in available_subs
+					disable_equal_and_larger_subs(sub)
+					//set streak to max so that this cannot be the start of a streak
+					same_letter_streak = 3
 				}
 				else {throw new Roman_Num_Err("non-standard subtraction")}
 			}
@@ -108,7 +130,7 @@ function Roman_Num_Init() {
 
 	function value(letter) {return Roman_Num.map.get(letter)}
 
-	function disable_equal_and_smaller_subs(str) {
+	function disable_equal_and_larger_subs(str) {
 		let set = Roman_Num.available_subs
 		let found = false
 		set.forEach(function(value) {
@@ -121,12 +143,12 @@ function Roman_Num_Init() {
 		//console.log(set)
 	}
 
-	function disable_smaller_digit_letters(sub) {
-		let sub_as_num = Roman_Num.convert(sub[1])-Roman_Num.convert(sub[0])
+	function disable_same_digit_letters(sub) {
+		let sub_as_num = value(sub[1])-value(sub[0])
 		let digits = sub_as_num.toString().length
 		let map = Roman_Num.available_letters
 		map.forEach(function(value, key) {
-			if (value.toString().length <= digits) {map.delete(key)}
+			if (value.toString().length === digits) {map.delete(key)}
 		})
 		//console.log(map)
 	}
@@ -139,30 +161,19 @@ function Roman_Num_Init() {
 }
 Roman_Num_Init()
 
+//test suite
 console.log(Roman_Num)
 console.log(Roman_Num.convert(1234))
 console.log(Roman_Num.convert("VII"))
 console.log(Roman_Num.convert("XXVIII"))
 console.log(Roman_Num.convert("IV"))
 console.log(Roman_Num.convert("IX"))
-console.log(Roman_Num.convert("IXV"))
-console.log(Roman_Num.convert("CMCD"))
-console.log(Roman_Num.convert("CIIX"))
+console.log(Roman_Num.convert("IXV"))  //invalid
+console.log(Roman_Num.convert("CMCD")) //invalid
+console.log(Roman_Num.convert("CIIX")) //invalid
+console.log(Roman_Num.convert("xcc")) //invalid
+console.log(Roman_Num.convert("xcix"))
 console.log(Roman_Num.convert("test12"))
-
-//html hook
-$('input').on('keydown', function(event) {
-	var x = event.which
-	if (x === 13) {
-		event.preventDefault()
-		submit_input()
-	}
-})
-function submit_input() {
-	let result = Roman_Num.convert(document.getElementById("myInput").value)
-	if (typeof result === "undefined") {result = "Invalid roman numeral. See console for error details."}
-	$(".result").html(result);
-}
 
 		</script>
   </body>
