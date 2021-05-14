@@ -1,6 +1,20 @@
-<script>
-'use strict';
+<!doctype html>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+  <body>
 
+  <form action="#">
+    Convert Roman Numerals to Arabic Numerals: <br>
+    <input type="text" id="myInput">
+    <input type="button" onclick="submit_input();" value="Convert">
+  </form>
+  <br>
+	<div class="result">
+	</div>
+	<script>
+'use strict';
 
 let Roman_Num = {}
 
@@ -14,48 +28,110 @@ function Roman_Num_Init() {
 	map.set("D", 500)
 	map.set("M", 1000)
 
-	Roman_Num.valid_roman_letters = new Array(Roman_Num.map.keys())
+	let dups = Roman_Num.valid_duplications = new Set()
+	dups.add("I")
+	dups.add("X")
+	dups.add("C")
+	dups.add("M")
 
-	Roman_Num.convert = function(input) {return convert(input)}
+	let subs = Roman_Num.valid_subtractions = new Set()
+	subs.add("IV")
+	subs.add("IX")
+	subs.add("XL")
+	subs.add("XC")
+	subs.add("CD")
+	subs.add("CM")
+
+	Roman_Num.convert = function(input) {
+		try {return convert(input)}
+		catch (err) {
+			if (err instanceof Roman_Num_Err) {
+				console.error(`Roman_Num_Err: ${err.type}`)
+			} else {throw err}
+		}
+	}
 
 	function convert(input) {
 		if ((typeof input) === "number") {return arab_to_roman(input)}
-		else if ((typeof input) === "string") {return roman_to_arab(input)}
+		else if ((typeof input) === "string") {
+			try {return roman_to_arab(input)}
+			catch (err) {
+				if (err instanceof Roman_Num_Err) {
+					console.error(`Invalid Roman Numeral: ${err.type}`)
+				} else {throw err}
+			}
+		}
 		else {throw new Roman_Num_Err("attempted convert() on neither number nor string")}
 	}
 
-	function arab_to_roman(num) {
-		return "arab_to_roman functionality coming soon near you!"
-	}
+	function arab_to_roman(num) {throw new Roman_Num_Err("arab_to_roman functionality coming soon near you!")}
 
 	function roman_to_arab(str) {
 		str = str.toUpperCase()
 		let prev_letter = ""
 		let current_letter = ""
-		let same_letter_streak = 0
+		let same_letter_streak = 1
 		let count = 0
+		Roman_Num.available_subs = new Set(Roman_Num.valid_subtractions)
+		Roman_Num.available_letters = new Map(Roman_Num.map)
 
 		for (let i=0; i<str.length; i++) {
 			prev_letter = current_letter
 			current_letter = str[i]
 
-			if (!Roman_Num.map.has(current_letter)) {throw new Roman_Num_Err("string contains invalid character")}
-			else if (prev_letter === "" || prev_letter === current_letter) {same_letter_streak++}
-			else if (value(prev_letter) > value(current_letter)) {
-				count += value(prev_letter) * same_letter_streak
-				same_letter_streak = 1
-			}
-			else if (same_letter_streak === 1) {
-				count -= value(prev_letter)
-			}
-			else {throw new Roman_Num_Err("non-standard subtractive notation")}
+			if (!Roman_Num.available_letters.has(current_letter)) {throw new Roman_Num_Err("string contains invalid character combination")}
+			else {count += value(current_letter)}
 
-			if (i === str.length-1) {count += value(prev_letter) * same_letter_streak}
+			if (prev_letter === current_letter) {
+				//split possibilities into duplication or not
+				if (Roman_Num.valid_duplications.has(current_letter)) {same_letter_streak++}
+				//only certain letters are valid duplications
+				else {throw new Roman_Num_Err("invalid letter duplication")}
+			}
+			else {
+				//if the letter is not a duplicate...
+				let sub = prev_letter+current_letter
+				if (prev_letter === "" || value(prev_letter) > value(current_letter)) {
+					same_letter_streak = 1
+					//but the letter is a smaller value than previous, then this is the beginning of a new segment
+				}
+				else if (same_letter_streak === 1 && Roman_Num.available_subs.has(sub)) {
+					count -= value(prev_letter)*2
+					disable_smaller_digit_letters(sub)
+					disable_equal_and_smaller_subs(sub)
+				}
+				else {throw new Roman_Num_Err("non-standard subtraction")}
+			}
+
+			if (same_letter_streak > 3) {throw new Roman_Num_Err("string contains character repeated 4x")}
 		}
 		return count
 	}
 
 	function value(letter) {return Roman_Num.map.get(letter)}
+
+	function disable_equal_and_smaller_subs(str) {
+		let set = Roman_Num.available_subs
+		let found = false
+		set.forEach(function(value) {
+			if (value === str) {found = true}
+			if (found) {set.delete(value)}
+		})
+		set.forEach(function(value) {
+			if (value[0] === str[0]) {set.delete(value)}
+		})
+		//console.log(set)
+	}
+
+	function disable_smaller_digit_letters(sub) {
+		let sub_as_num = Roman_Num.convert(sub[1])-Roman_Num.convert(sub[0])
+		let digits = sub_as_num.toString().length
+		let map = Roman_Num.available_letters
+		map.forEach(function(value, key) {
+			if (value.toString().length <= digits) {map.delete(key)}
+		})
+		//console.log(map)
+	}
 
 	class Roman_Num_Err {
 		constructor(type) {
@@ -65,13 +141,31 @@ function Roman_Num_Init() {
 }
 Roman_Num_Init()
 
-
 console.log(Roman_Num)
 console.log(Roman_Num.convert(1234))
 console.log(Roman_Num.convert("VII"))
 console.log(Roman_Num.convert("XXVIII"))
 console.log(Roman_Num.convert("IV"))
-console.log(Roman_Num.convert("MM22"))
+console.log(Roman_Num.convert("IX"))
+console.log(Roman_Num.convert("IXV"))
+console.log(Roman_Num.convert("CMCD"))
+console.log(Roman_Num.convert("CIIX"))
 console.log(Roman_Num.convert("test12"))
 
-</script>
+//html hook
+$('input').on('keydown', function(event) {
+	var x = event.which
+	if (x === 13) {
+		event.preventDefault()
+		submit_input()
+	}
+})
+function submit_input() {
+	let result = Roman_Num.convert(document.getElementById("myInput").value)
+	if (typeof result === "undefined") {result = "Invalid roman numeral. See console for error details."}
+	$(".result").html(result);
+}
+
+		</script>
+  </body>
+</html>
