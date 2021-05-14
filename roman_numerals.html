@@ -84,7 +84,7 @@ function Roman_Num_Init() {
 
 			if (prev_letter === current_letter) {
 				//split possibilities into duplication or not
-				if (Roman_Num.valid_duplications.has(current_letter)) {same_letter_streak++}
+				if (Roman_Num.valid_duplications.has(current_letter) && same_letter_streak > 3) {same_letter_streak++}
 				//only certain letters are valid duplications
 				else {throw new Roman_Num_Err("invalid letter duplication")}
 			}
@@ -102,8 +102,6 @@ function Roman_Num_Init() {
 				}
 				else {throw new Roman_Num_Err("non-standard subtraction")}
 			}
-
-			if (same_letter_streak > 3) {throw new Roman_Num_Err("string contains character repeated 4x")}
 		}
 		return count
 	}
