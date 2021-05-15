@@ -36,30 +36,8 @@ function submit_input() {
 let Roman_Num = {}
 
 function Roman_Num_Init() {
-	let map = Roman_Num.map = new Map()
-	map.set("I", 1)
-	map.set("V", 5)
-	map.set("X", 10)
-	map.set("L", 50)
-	map.set("C", 100)
-	map.set("D", 500)
-	map.set("M", 1000)
 
-	let dups = Roman_Num.valid_duplications = new Set()
-	dups.add("I")
-	dups.add("X")
-	dups.add("C")
-	dups.add("M")
-
-	let subs = Roman_Num.valid_subtractions = new Set()
-	subs.add("IV")
-	subs.add("IX")
-	subs.add("XL")
-	subs.add("XC")
-	subs.add("CD")
-	subs.add("CM")
-
-	map = Roman_Num.a_to_r = new Map()
+	let map = Roman_Num.a_to_r = new Map()
 	map.set(1, "I")
 	map.set(2, "II")
 	map.set(3, "III")
@@ -112,6 +90,8 @@ function Roman_Num_Init() {
 		else {throw new Roman_Num_convert_err("attempted convert() on neither number nor string")}
 	}
 
+	function value(letter) {return Roman_Num.r_to_a.get(letter)}
+
 	function arab_to_roman(num) {
 		if (!(Number.isInteger(num) && 0 < num && num <= 3999)) {throw new parse_arab_err("number not in valid domain of integers from 1 to 3999")}
 
@@ -120,8 +100,8 @@ function Roman_Num_Init() {
 		let result = ""
 		for (let i=0; i < len; i++) {
 			let digit = str.slice(-1)
-			let zeros = 10**i
-			let value = parseInt(digit) * zeros
+			let magnitude = 10**i
+			let value = parseInt(digit) * magnitude
 			let letter = Roman_Num.a_to_r.get(value)
 			result = letter + result
 
@@ -132,75 +112,63 @@ function Roman_Num_Init() {
 
 	function roman_to_arab(str) {
 		str = str.toUpperCase()
-		let prev_letter = ""
-		let current_letter = ""
-		let same_letter_streak = 1
+		r_to_a_reset()
+		let word = ""
 		let count = 0
-		Roman_Num.available_subs = new Set(Roman_Num.valid_subtractions)
-		Roman_Num.available_letters = new Map(Roman_Num.map)
-
+		let word_is_valid = false
 		for (let i=0; i<str.length; i++) {
-			prev_letter = current_letter
-			current_letter = str[i]
+			let current_letter = str[i]
+			word = word + current_letter
+			Roman_Num.r_to_a.forEach(function(value, key) {
+				if (word === key.slice(0,word.length)) {
+					word_is_valid = true
+				}
+			})
 
-			if (!Roman_Num.map.has(current_letter)) {throw new parse_roman_err("string contains invalid character")}
-			count += value(current_letter)
-
-			if (prev_letter === current_letter) {
-				//split possibilities into duplication or not
-				if (Roman_Num.valid_duplications.has(current_letter) && same_letter_streak < 3) {same_letter_streak++}
-				//only certain letters are valid duplications
-				else {throw new parse_roman_err("invalid letter duplication")}
+			if (word_is_valid) {
+				//do nothing, and move to next loop, unless this is last iteration
+				if (i === str.length-1) {count = count + value(word)}
 			}
 			else {
-				let sub = prev_letter+current_letter
-				//if the letter is not a duplicate, and it is smaller in value, it may be a new segment
-				if (prev_letter === "" || value(prev_letter) > value(current_letter)) {
-					//check to see if the value is valid: it cannot be disabled due to previous subtraction notation already representing the relevant digit
-					if (!Roman_Num.available_letters.has(current_letter)) {throw new parse_roman_err("invalid sequence of letters")}
-					same_letter_streak = 1
+				if (word.length > 1) {
+					//take the word without last letter, which must already be valid (see else block)
+					word = word.slice(0,-1)
+					count = count + value(word)
+					//prune list of valid words so the same digit cannot be matched for again
+					r_to_a_prune(word)
+					//reset word and iteration to try this letter again, starting a new word
+					word = ""
+					i--
 				}
-				//if the letter is a larger value, we check if it is a valid subtraction
-				else if (same_letter_streak === 1 && Roman_Num.available_subs.has(sub)) {
-					//undo previous count of the subtracted value and subtract it
-					count -= value(prev_letter)*2
-					//disable letters in available_letters which represent the same digit range
-					disable_same_digit_letters(sub)
-					//disable the same and larger subtractions in available_subs
-					disable_equal_and_larger_subs(sub)
-					//set streak to max so that this cannot be the start of a streak
-					same_letter_streak = 3
+				else {
+					//if this is the first letter of a word, then this letter is invalid
+					throw new parse_roman_err("contains invalid letter or sequence")
 				}
-				else {throw new parse_roman_err("non-standard subtraction")}
 			}
+			//next loop must check word for validity again
+			word_is_valid = false
 		}
 		return count
 	}
 
-	function value(letter) {return Roman_Num.map.get(letter)}
-
-	function disable_equal_and_larger_subs(str) {
-		let set = Roman_Num.available_subs
-		let found = false
-		set.forEach(function(value) {
-			if (value === str) {found = true}
-			if (found) {set.delete(value)}
+	function r_to_a_reset() {
+		//creates a map of a_to_r with values and keys switched
+		map = Roman_Num.r_to_a = new Map()
+		Roman_Num.a_to_r.forEach(function(value, key) {
+			map.set(value, key)
 		})
-		set.forEach(function(value) {
-			if (value[0] === str[0]) {set.delete(value)}
-		})
-		//console.log(set)
 	}
 
-	function disable_same_digit_letters(sub) {
-		let sub_as_num = value(sub[1])-value(sub[0])
-		let digits = sub_as_num.toString().length
-		let map = Roman_Num.available_letters
+	function r_to_a_prune(word) {
+		//given a word, count the digits of its value, then remove from map all values with >= digits
+		//uses default base 10
+		let digits = value(word).toString().length
+		map = Roman_Num.r_to_a
 		map.forEach(function(value, key) {
-			if (value.toString().length === digits) {map.delete(key)}
+			if (value.toString().length >= digits) {map.delete(key)}
 		})
-		//console.log(map)
 	}
+
 
 	class Roman_Num_convert_err {
 		constructor(type) {
@@ -231,17 +199,20 @@ Roman_Num_Init()
 function test_suite() {
 	console.log(Roman_Num)
 	console.log(Roman_Num.convert(1234))
+	console.log(Roman_Num.convert(202020)) //invalid
 	console.log(Roman_Num.convert("VII"))
 	console.log(Roman_Num.convert("XXVIII"))
 	console.log(Roman_Num.convert("IV"))
 	console.log(Roman_Num.convert("IX"))
+	console.log(Roman_Num.convert("xcix"))
+	console.log(Roman_Num.convert("lxxiv"))
+	console.log(Roman_Num.convert("test12")) //invalid
 	console.log(Roman_Num.convert("IXV"))  //invalid
 	console.log(Roman_Num.convert("CMCD")) //invalid
 	console.log(Roman_Num.convert("CIIX")) //invalid
 	console.log(Roman_Num.convert("xcc")) //invalid
-	console.log(Roman_Num.convert("xcix"))
-	console.log(Roman_Num.convert("test12"))
 }
+test_suite()
 
 		</script>
   </body>
