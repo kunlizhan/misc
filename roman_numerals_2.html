@@ -26,10 +26,7 @@ $('input').on('keydown', function(event) {
 })
 function submit_input() {
 	let result = Roman_Num.convert(document.getElementById("myInput").value)
-	if (typeof result === "undefined") {
-		//result = "Invalid roman numeral. See console for error details."
-	}
-	else {$(".result").html(result)}
+	$(".result").html(result)
 }
 
 //Roman_Num library
@@ -73,16 +70,19 @@ function Roman_Num_Init() {
 	map.set(3000, "MMM")
 
 	Roman_Num.convert = function(input) {
-		let num = parseInt(input)
-		if (!isNaN(num) && num.toString() === input) {input = num}
-
 		try {return convert(input)}
 		catch (err) {
-			parse_err(err)
+			return parse_err(err)
 		}
 	}
 
 	function convert(input) {
+		//check if the exact string can be turned into a Number
+		//this is required because everything typed in the html input comes in as a string
+		//however this is not necessary if code is directly using Roman_Num.convert(number)
+		let num = parseInt(input)
+		if (!isNaN(num) && num.toString() === input) {input = num}
+
 		if ((typeof input) === "number") {return arab_to_roman(input)}
 		else if ((typeof input) === "string") {return roman_to_arab(input)}
 		else {throw new Roman_Num_convert_err("attempted convert() on neither number nor string")}
@@ -187,7 +187,7 @@ function Roman_Num_Init() {
 		if (err instanceof Roman_Num_convert_err) {
 			let msg = `${err.constructor.name}: ${err.type}`
 			console.error(msg)
-			$(".result").html(msg)
+			return msg
 		} else {throw err}
 	}
 }
