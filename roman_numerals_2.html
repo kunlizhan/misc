@@ -84,9 +84,7 @@ function Roman_Num_Init() {
 
 	function convert(input) {
 		if ((typeof input) === "number") {return arab_to_roman(input)}
-		else if ((typeof input) === "string") {
-			return roman_to_arab(input)
-		}
+		else if ((typeof input) === "string") {return roman_to_arab(input)}
 		else {throw new Roman_Num_convert_err("attempted convert() on neither number nor string")}
 	}
 
