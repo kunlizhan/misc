@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+  <body>
+
+  <form action="#">
+    <input type="button" onclick="submit_input();" value="Get Time">
+  </form>
+  <br>
+	<div class="result">
+	</div>
+	<script>
+'use strict';
+
+//html hook
+$('input').on('keydown', function(event) {
+	var x = event.which
+	if (x === 13) {
+		event.preventDefault()
+		submit_input()
+	}
+})
+function submit_input() {
+	let result = get_time()
+	$(".result").html(result)
+}
+
+//get_time
+function get_time() {
+	let date = new Date()
+	let hours = date.getHours()
+	let minutes = date.getMinutes()
+	let seconds = date.getSeconds()
+	let text = `${hours}:${minutes}:${seconds}`
+	return text
+}
+
+		</script>
+  </body>
+</html>
