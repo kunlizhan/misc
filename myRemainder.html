@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+  <body>
+
+  <form action="#">
+    Convert between Roman and Arabic numerals: <br>
+    <input type="text" id="myInput">
+    <input type="button" onclick="submit_input();" value="Convert">
+  </form>
+  <br>
+	<div class="result">
+	</div>
+	<script>
+'use strict';
+
+//html hook
+$('input').on('keydown', function(event) {
+	var x = event.which
+	if (x === 13) {
+		event.preventDefault()
+		submit_input()
+	}
+})
+function submit_input() {
+	let result = Roman_Num.convert(document.getElementById("myInput").value)
+	$(".result").html(result)
+}
+
+//myRemainder
+
+		</script>
+  </body>
+</html>
