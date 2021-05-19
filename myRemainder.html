@@ -39,7 +39,7 @@ function myRemainder(a, b) {
 	let quotient = a/b
 	let q_int = Math.trunc(quotient)
 	let remainder = a - (b*q_int)
-	let a_negative = (Math.sign(a) === -1 || Math.sign(a) === -0)
+	let a_negative = (Object.is(Math.sign(a), -1) || Object.is(Math.sign(a), -0))
 	if (remainder === 0 && a_negative === true) {
 		remainder = -0
 	}
@@ -77,6 +77,7 @@ function test_suite() {
 
 	test(-12,-5)
 	test(-0,-5)
+	test(0, 5)
 	console.log( (all_passed)? `All tests passed` : `One or more tests failed`)
 }
 
