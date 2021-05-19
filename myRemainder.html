@@ -6,9 +6,10 @@
   <body>
 
   <form action="#">
-    Convert between Roman and Arabic numerals: <br>
-    <input type="text" id="myInput">
-    <input type="button" onclick="submit_input();" value="Convert">
+    Get the remainder of: <br>
+    <input type="text" id="myInput_A"><br>
+		<input type="text" id="myInput_B">
+    <input type="button" onclick="submit_input();" value="Calculate">
   </form>
   <br>
 	<div class="result">
@@ -25,12 +26,65 @@ $('input').on('keydown', function(event) {
 	}
 })
 function submit_input() {
-	let result = Roman_Num.convert(document.getElementById("myInput").value)
+	let result = myRemainder((document.getElementById("myInput_A").value), (document.getElementById("myInput_B").value))
+	if (Object.is(result, -0)) {result = "-0"}
+	if (Object.is(result, NaN)) {result = "NaN"}
 	$(".result").html(result)
 }
 
 //myRemainder
+function myRemainder(a, b) {
+	a = Number(a)
+	b = Number(b)
+	let quotient = a/b
+	let q_int = Math.trunc(quotient)
+	let remainder = a - (b*q_int)
+	let a_negative = (Math.sign(a) === -1 || Math.sign(a) === -0)? true : false
+	if (remainder === 0 && a_negative === true) {
+		remainder = -0
+	}
+	return remainder
+}
 
+//test_suite
+function test_suite() {
+	let all_passed = true
+	function test(a, b, expected) {
+		let result = myRemainder(a,b)
+		expected = a % b
+
+		if (Object.is(result, expected) !== true) {
+			failed()
+		}
+		return result
+
+		function failed() {
+				console.error("Test failed: myRemainder(", a, ", ", b, ") returns", result, "but expected", expected)
+				all_passed = false
+		}
+	}
+	test(12,5)
+	test(1,-2)
+	test(1,2)
+	test(2,3)
+	test(5.5,2)
+
+	test(-12,5)
+	test(-1,2)
+	test(-4,2)
+
+	test(NaN,2)
+
+	test(Infinity,2)
+	test(Infinity,0)
+	test(Infinity,Infinity)
+
+	test(-12,-5)
+	test(-0,-5)
+	console.log( (all_passed)? `All tests passed` : `One or more tests failed`)
+}
+
+test_suite()
 		</script>
   </body>
 </html>
