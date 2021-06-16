@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+  <body>
+	<script>
+'use strict';
+
+//Main library
+
+function isPrime(input) {
+	if (!Number.isInteger(input)) {	throw new isPrime_err("Input is not an integer") }
+	if (!(1 < input && input <= 10**9)) { throw new isPrime_err("Input is out of range. Required: 1 < input <= 10^9") }
+	let max_try = input**(1/2)
+	for (let i = 2; i <= Math.trunc(max_try); i++) {
+		if (input % i === 0) { return false }
+	}
+	return true
+}
+	//errors
+class isPrime_err {
+	constructor(message) {
+		this.name = "isPrime_err"
+		this.message = message
+	}
+}
+
+//test suite
+function test_suite(myFunc, expected_err) {
+	let err = new expected_err()
+	let tests = [
+		[12, false],
+		[13, true],
+		[63, false],
+		[67, true],
+		[871, false],
+		[15485863, true],
+		[15485869, false],
+
+		[2, true],
+		[16, false],
+		[{}, err],
+		[1000000000, false],
+		[1000000001, err],
+	]
+	let input = 0
+	let expected = 1
+	let all_passed = true
+	for (let test of tests) {
+		try {
+			let result = myFunc(test[input])
+			if (result !== test[expected]) {
+				failed(test[input], result, test[expected])
+			}
+		}
+		catch (result_err) {
+			if (result_err instanceof expected_err) {
+				if (test[expected] instanceof expected_err) {}
+				else { failed(test[input], result_err, test[expected]) }
+			}
+			else { throw result_err }
+		}
+	}
+	function failed(input, result, expected) {
+		all_passed = false
+		console.error("Test failed: isPrime(", input, ") returns", result, "but expected", expected)
+	}
+	if (all_passed) { console.log("All tests passed") }
+	else { console.error("One or more tests failed") }
+}
+test_suite(isPrime, isPrime_err)
+
+		</script>
+  </body>
+</html>

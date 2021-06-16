@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+  <body>
+	<script>
+'use strict';
+
+//Main library
+
+function isItEmpty(input) {
+	let type = typeof input
+	switch (type) {
+		case "object":
+			return (Object.keys(input).length === 0)? true : false
+		case "array":
+			return (input.length === 0)? true : false
+		default:
+			throw new isItEmpty_err("Input is neither object nor array")
+	}
+}
+	//errors
+class isItEmpty_err {
+	constructor(desc) {
+		this.desc = desc
+	}
+}
+
+//test suite
+function test_suite() {
+	let tests = [
+		[{}, true],
+		[[], true],
+		[{key: 'value'}, false],
+		[[1,2,3], false],
+		"test_string"
+	]
+	let input = 0
+	let expected = 1
+	let all_passed = true
+	for (let test of tests) {
+		if (isItEmpty(test[input]) !== test[expected]) {
+			all_passed = false
+			console.error("Test failed: isItEmpty(", test[input], ") returns", result, "but expected", expected)
+		}
+	}
+	if (all_passed) { console.log("All tests passed") }
+	else { console.error("One or more tests failed") }
+}
+test_suite()
+
+		</script>
+  </body>
+</html>
