@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+  <body>
+
+  <form action="#">
+    Generate all possible RPS sequences for
+    <input type="text" id="myInput">
+		rounds
+    <input type="button" onclick="submit_input();" value="Submit">
+  </form>
+  <br>
+	<div class="result">
+	</div>
+	<script>
+'use strict';
+
+//html hook
+$('input').on('keydown', function(event) {
+	let x = event.which
+	if (x === 13) {
+		event.preventDefault()
+		submit_input()
+	}
+})
+function submit_input() {
+	let result = ""
+	try {result = RPS.list(document.getElementById("myInput").value) }
+	catch(err) {
+		if (err instanceof RPS.Errs.Input_err) {
+			let msg = `${err.constructor.name}: ${err.desc}`
+			console.error(msg)
+			result = msg
+		} else {throw err}
+	}
+	$(".result").html(result)
+}
+
+//RPS library
+let RPS = {}
+
+function RPS_Init(RPS) {
+
+	RPS.list = function(input) {
+		input = Number(input)
+		if (isNaN(input)) {throw new RPS.Errs.Input_err("input not a number")}
+
+		let options = ["R", "P", "S"]
+		let list = options.slice()
+
+		for (let i=1; i < input; i++) {
+			list = new_round(list)
+		}
+		function new_round(list) {
+			let new_list = []
+			for (let i of list) {
+				new_list = new_list.concat(new_permutation(i))
+			}
+			return new_list
+		}
+		function new_permutation(init) {
+			let seq = []
+			for (let option of options) {
+				seq.push(init+option)
+			}
+			return seq
+		}
+
+		return list.join(", ")
+	}
+
+	//errors
+	let Errs = RPS.Errs = {}
+	Errs.Generic = class Generic {
+		constructor(desc) {
+			this.desc = desc
+		}
+	}
+	Errs.Input_err = class Input_err extends Errs.Generic {
+		constructor(desc) {
+			super(desc)
+		}
+	}
+}
+RPS_Init(RPS)
+
+//test suite
+function test_suite() {
+}
+//test_suite()
+
+		</script>
+  </body>
+</html>
