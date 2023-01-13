@@ -11,7 +11,8 @@ const notification = new Notification("welcome")
 let btn = document.getElementById('btn')
 
 btn.addEventListener('click', () => {
-  let promise = Notification.requestPermission().then((permission) => {
+  try {
+    let promise = Notification.requestPermission().then((permission) => {
       // If the user accepts, let's create a notification
       console.log(permission)
       if (permission === "granted") {
@@ -19,6 +20,9 @@ btn.addEventListener('click', () => {
         const notification = new Notification("Hi there!")
       }
     })
+  } catch (e) {
+    btn.textContent = e.message
+  }
 })
 
 		</script>
