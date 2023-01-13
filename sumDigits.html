@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+  <body>
+
+	<script>
+'use strict';
+
+function sumDigits(num) {
+
+  //convert the number into a string to split into an array with each individual number as an element
+
+  var string = num.toString();
+
+  var array = string.split('');
+
+  //create a sum variable to perform an iteration of the array
+
+  var sum = 0;
+
+  //iterate over the array adding each element, except in the case where the first number is negative
+
+  for (var i = 0; i < array.length; i++){
+		console.log(Number(array[i]))
+
+    if (Number(array[i]) === '-'){
+
+      continue;
+
+    }
+
+    sum += Number(array[i]);
+
+  }
+
+  return sum;
+
+}
+
+
+
+var output = sumDigits(1148);
+
+console.log(output); // --> 14
+
+
+
+var output = sumDigits(-316);
+
+console.log(output); // --> 4
+
+		</script>
+  </body>
+</html>

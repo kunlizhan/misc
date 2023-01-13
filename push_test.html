@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+	<head>
+	</head>
+  <body>
+    <button id='btn'>Allow</button>
+	<script>
+'use strict';
+
+const notification = new Notification("welcome")
+let btn = document.getElementById('btn')
+
+btn.addEventListener('click', () => {
+  let promise = Notification.requestPermission().then((permission) => {
+      // If the user accepts, let's create a notification
+      console.log(permission)
+      if (permission === "granted") {
+        console.log(permission)
+        const notification = new Notification("Hi there!")
+      }
+    })
+})
+
+		</script>
+  </body>
+</html>
