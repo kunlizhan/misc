@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Drag and Drop Blue Box</title>
+    <style>
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="400" height="400"></canvas>
+    <script>
+      var canvas = document.getElementById("myCanvas");
+      var ctx = canvas.getContext("2d");
+
+      // Set initial box position and size
+      var box = { x: 50, y: 50, width: 50, height: 50 };
+
+      // Set center area position and size
+      var centerArea = {
+        x: canvas.width / 2 - 25,
+        y: canvas.height / 2 - 25,
+        width: 50,
+        height: 50,
+      };
+
+      // Draw blue box and center area on canvas
+      ctx.fillStyle = "blue";
+      ctx.fillRect(box.x, box.y, box.width, box.height);
+      ctx.fillStyle = "rgba(0, 0, 255, 0.3)";
+      ctx.fillRect(centerArea.x, centerArea.y, centerArea.width, centerArea.height);
+
+      // Add event listeners for dragging
+      canvas.addEventListener("mousedown", startDrag);
+      canvas.addEventListener("mousemove", drag);
+      canvas.addEventListener("mouseup", endDrag);
+
+      // Variables for dragging logic
+      var isDragging = false;
+      var dragOffset = { x: 0, y: 0 };
+
+      // Function to check if mouse is inside box
+      function isMouseInsideBox(mouseX, mouseY) {
+        return (
+          mouseX > box.x &&
+          mouseX < box.x + box.width &&
+          mouseY > box.y &&
+          mouseY < box.y + box.height
+        );
+      }
+
+      // Function to start dragging
+      function startDrag(event) {
+        if (isMouseInsideBox(event.offsetX, event.offsetY)) {
+          isDragging = true;
+          dragOffset.x = event.offsetX - box.x;
+          dragOffset.y = event.offsetY - box.y;
+        }
+      }
+
+      // Function to perform dragging
+      function drag(event) {
+        if (isDragging) {
+          box.x = event.offsetX - dragOffset.x;
+          box.y = event.offsetY - dragOffset.y;
+
+          // Check if box is near center area
+          if (
+            box.x + box.width > centerArea.x &&
+            box.x < centerArea.x + centerArea.width &&
+            box.y + box.height > centerArea.y &&
+            box.y < centerArea.y + centerArea.height
+          ) {
+            // Snap box to center area
+            box.x = centerArea.x + centerArea.width / 2 - box.width / 2;
+            box.y = centerArea.y + centerArea.height / 2 - box.height / 2;
+          }
+
+          // Clear canvas and redraw box and center area in new positions
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "blue";
+          ctx.fillRect(box.x, box.y, box.width, box.height);
+          ctx.fillStyle = "rgba(0, 0, 255, 0.3)";
+          ctx.fillRect(centerArea.x, centerArea.y, centerArea.width, centerArea.height);
+        }
+      }
+
+      // Function to end dragging
+      function endDrag(event) {
+        isDragging = false;
+      }
+    </script>
+  </body>
+</html>
