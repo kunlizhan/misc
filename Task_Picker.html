@@ -163,14 +163,16 @@
         function generateRandomTasks() {
             const highPool = tasks.filter(t => t.tags.includes('high-priority'));
             const lowPool = tasks.filter(t => t.tags.includes('low-priority'));
+            const highPool_min = 3
+            const lowPool_min = 5
 
-            if (highPool.length < 2 || lowPool.length < 3) {
-                alert(`Not enough tasks! \nNeed: 2 High, 3 Low. \nCurrent: ${highPool.length} High, ${lowPool.length} Low.`);
+            if (highPool.length < highPool_min || lowPool.length < 5) {
+                alert(`Not enough tasks! \nNeed: ${highPool_min} High, ${lowPool_min} Low. \nCurrent: ${highPool.length} High, ${lowPool.length} Low.`);
                 return;
             }
 
-            const selectedHigh = getRandomItems(highPool, 2);
-            const selectedLow = getRandomItems(lowPool, 3);
+            const selectedHigh = getRandomItems(highPool, highPool_min);
+            const selectedLow = getRandomItems(lowPool, 5);
             const allSelected = [...selectedHigh, ...selectedLow];
 
             const resultsContainer = document.getElementById('resultsContainer');
