@@ -156,7 +156,11 @@
         }
 
         function getRandomItems(arr, count) {
-            const shuffled = [...arr].sort(() => 0.5 - Math.random());
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
             return shuffled.slice(0, count);
         }
 
@@ -166,13 +170,13 @@
             const highPool_min = 3
             const lowPool_min = 5
 
-            if (highPool.length < highPool_min || lowPool.length < 5) {
+            if (highPool.length < highPool_min || lowPool.length < lowPool_min) {
                 alert(`Not enough tasks! \nNeed: ${highPool_min} High, ${lowPool_min} Low. \nCurrent: ${highPool.length} High, ${lowPool.length} Low.`);
                 return;
             }
 
             const selectedHigh = getRandomItems(highPool, highPool_min);
-            const selectedLow = getRandomItems(lowPool, 5);
+            const selectedLow = getRandomItems(lowPool, lowPool_min);
             const allSelected = [...selectedHigh, ...selectedLow];
 
             const resultsContainer = document.getElementById('resultsContainer');
